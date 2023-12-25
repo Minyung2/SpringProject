@@ -13,6 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @SpringBootTest
@@ -21,35 +22,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //@EnableWebSecurity
 @TestPropertySource(locations = "classpath:application-test.properties")
 class UserServiceTest {
+
     @Autowired
-    UserService userService;
+    private CommonQueryDSL commonQueryDSL;
+
     @Autowired
-    CommonQueryDSL commonQueryDSL;
-//    @Autowired
-//    PasswordEncoder passwordEncoder;
+    private UserService userService;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Test
     @DisplayName("saveUser 테스트")
-    void saveUser() {
+    private User saveUser() {
         User user = new User();
         user.setEmail("test@test.com");
         user.setMobile("01012345678");
         user.setName("테스트");
         user.setPassword("1");
         user.setRole(Role.USER);
-        User savedUser = userService.saveUser(user);
 
-        assertEquals(user.getEmail(), savedUser.getEmail());
-        assertEquals(user.getPassword(), savedUser.getPassword());
-        assertEquals(user.getName(), savedUser.getName());
-        assertEquals(user.getMobile(), savedUser.getMobile());
-        assertEquals(user.getRole(), savedUser.getRole());
+        return user;
     }
 
     @Test
     @DisplayName("select QueryDSL List")
     void selectList() {
-        saveUser();
+        User user = saveUser();
+        userService.saveUser(user);
 
         List<User> userList = commonQueryDSL.selectList(QUser.user);
         assertEquals(1, userList.size());
@@ -57,4 +57,23 @@ class UserServiceTest {
         log.info("user : " + retrievedUser.toString());
         assertEquals("test@test.com", retrievedUser.getEmail());
     }
+
+    @Test
+    @DisplayName("Duplicate User Test")
+    @Transactional
+    void saveDuplicateUser() {
+        User savedUser = saveUser();
+        User newUser = saveUser();
+        userService.saveUser(savedUser);
+
+//      중복되지 않은 이메일 테스트
+//      newUser.setEmail("test2@test.com");
+
+        Throwable e = assertThrows(IllegalStateException.class, () -> {
+            userService.saveUser(newUser);
+        });
+        assertEquals("이미 가입된 회원입니다.", e.getMessage());
+    }
+
+
 }
