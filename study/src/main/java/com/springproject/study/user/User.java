@@ -7,11 +7,19 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "`user`")
+@Table(name = "users")
 @Getter
 @Setter
 @ToString
 public class User {
+    //    @Id
+//    @SequenceGenerator(
+//            name = "ID_SEQ_GENERATOR",
+//            sequenceName = "ID_SEQ",
+//            initialValue = 1, allocationSize = 50
+//    )
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+//            generator = "ID_SEQ_GENERATOR")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,4 +30,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String mobile;
+
+
 }
