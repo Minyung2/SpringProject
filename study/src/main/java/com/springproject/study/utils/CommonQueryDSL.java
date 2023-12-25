@@ -2,7 +2,9 @@ package com.springproject.study.utils;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.springproject.study.user.QUser;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,23 @@ public class CommonQueryDSL {
         return queryFactory.selectFrom(entityPath)
                 .where(predicate)
                 .fetch();
+    }
+
+    public <T> Boolean existWithoutLimit(String email) {
+        QUser qUser = QUser.user; // QUser 인스턴스
+        return queryFactory
+                .selectFrom(qUser)
+                .where(qUser.email.eq(email))
+                .fetchCount() > 0;
+    }
+
+    public <T> Boolean existWithLimit(EntityPathBase<T> entityPath, StringPath stringPath, String email) {
+        Integer fetchOne = queryFactory
+                .selectOne()
+                .from(entityPath)
+                .where(stringPath.eq(email))
+                .fetchFirst();
+        return fetchOne != null;
     }
 }
 
