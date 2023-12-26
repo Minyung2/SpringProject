@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -47,15 +46,8 @@ public class UserService {
     }
 
     public User saveUser(User user) {
-        this.isDuplicatedUser(user);
         User savedUser = userRepository.save(user);
         return savedUser;
     }
 
-    public void isDuplicatedUser(User user) {
-        Optional<User> register = userRepository.findUserByEmail(user.getEmail());
-        if (register.isPresent()) {
-            throw new IllegalStateException("이미 가입된 회원입니다.");
-        }
-    }
 }
